@@ -14,24 +14,46 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AppConfig {
 
-  @Bean
-  public MemberService memberService() {
-    return new MemberServiceImpl(memberRepository());
-  }
+    //@Bean memberService -> memberRepository
+    //@Bean orderService -> memberRepository
+    // 두 번 호출될 때 싱글톤이 유지될까 ?
+    // 스프링은 어떻게 해결할 수 있을까 ?
 
-  @Bean
-  public OrderService orderService() {
-    return new OrderServiceImpl(memberRepository(), discountPolicy());
-  }
+    // 예상
+    // call AppConfig.memberService
+    // call AppConfig.memberRepository
+    // call AppConfig.memberRepository
+    // call AppConfig.orderService
+    // call AppConfig.memberRepository
 
-  @Bean
-  public static MemberRepository memberRepository() {
-    return new MemoryMemberRepository();
-  }
+    // 실제
+    // call AppConfig.memberService
+    // call AppConfig.memberRepository
+    // call AppConfig.orderService
 
-  @Bean
-  public static DiscountPolicy discountPolicy() {
+    // 이게 대체 어떻게 된걸까 ?
+
+    @Bean
+    public MemberService memberService() {
+        System.out.println("call AppConfig.memberService");
+        return new MemberServiceImpl(memberRepository());
+    }
+
+    @Bean
+    public OrderService orderService() {
+        System.out.println("call AppConfig.orderService");
+        return new OrderServiceImpl(memberRepository(), discountPolicy());
+    }
+
+    @Bean
+    public MemberRepository memberRepository() {
+        System.out.println("call AppConfig.memberRepository");
+        return new MemoryMemberRepository();
+    }
+
+    @Bean
+    public DiscountPolicy discountPolicy() {
 //        return new FixDiscountPolicy();
-    return new RateDiscountPolicy();
-  }
+        return new RateDiscountPolicy();
+    }
 }
